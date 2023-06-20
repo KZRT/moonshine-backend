@@ -6,7 +6,7 @@ pub mod parser;
 mod dbcheck;
 
 fn main() {
-    let mut client = Client::connect( "host=localhost user=whbaek password=moonshine dbname=moonshine port=5432", NoTls)
+    let mut client = Client::connect( "host=localhost user= password= dbname= port=5432", NoTls)
         .expect("Failed to connect to database");
     let ingredients = parser::parse_ingredients();
     let cocktails = parser::parse_cocktails();
