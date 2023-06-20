@@ -4,7 +4,7 @@ use postgres::{Client, NoTls, Error};
 use postgres::error::DbError;
 
 fn main() {
-    let mut client = Client::connect( "host=localhost user=whbaek password=moonshine dbname=moonshine port=5432", NoTls)
+    let mut client = Client::connect( "host=localhost user= password= dbname= port=5432", NoTls)
         .expect("Failed to connect to database");
 
     let select_cocktail_id_query = "SELECT cocktail_id FROM moonshine.cocktail_taste_composition";

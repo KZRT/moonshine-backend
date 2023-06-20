@@ -1,16 +1,37 @@
-# moonshine_fe
+# moonshine_backend
 
-A new Flutter project.
+## Compile and Run
+For running server instance, use
+```bash
+    cd node
+    npm install
+    npm start
+```
 
-## Getting Started
+For Database initialization use
+```bash
+    cd sqls
+    psql -U ${username} -f init.sql
+```
 
-This project is a starting point for a Flutter application.
+For parsing data to database, you should configure main file of both Parsing directories.
+At the first line,
+```rust
+fn main() {
+    let mut client = Client::connect( "host=localhost user= password= dbname= port=5432", NoTls)
+        .expect("Failed to connect to database");
+```
+fill user= as username, password= with password, and dbname= with database name.
 
-A few resources to get you started if this is your first Flutter project:
+For parsing cocktail taste data, use
+```bash
+    cd csvParsing
+    cargo run
+```
+Crawled data is in csvParsing/src/taste_crawling.csv
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+For parsing cocktail recipe data, use
+```bash
+    cd jsonParsing
+    cargo run
+```
