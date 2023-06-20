@@ -1,8 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
-import '../apis/cocktail_project.dart';
-
 class CocktailDetailImage extends StatefulWidget {
   final List<String> imgList;
 
@@ -76,8 +74,9 @@ class _CocktailDetailImageState extends State<CocktailDetailImage> {
                             return SizedBox(
                               height: size,
                               width: size,
-                              child: Image.network(
-                                CocktailProject.baseUrl + item,
+                              child: Image(
+                                // item,
+                                image: AssetImage(item),
                                 width: size,
                                 height: size,
                                 fit: BoxFit.fitHeight,

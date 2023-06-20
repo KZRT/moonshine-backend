@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:moonshine_fe/apis/cocktail_project.dart';
+import 'package:moonshine_fe/apis/cocktail_api.dart';
+import 'package:moonshine_fe/apis/favorite_api.dart';
 import 'package:moonshine_fe/apis/geolocation.dart';
-import 'package:moonshine_fe/widgets/cocktail_detail_bar_list_widget.dart';
+import 'package:moonshine_fe/widgets/cocktail_detail_blog_list_widget.dart';
 import 'package:moonshine_fe/widgets/cocktail_detail_chart_widget.dart';
 import 'package:moonshine_fe/widgets/cocktail_detail_cocktail_list_widget.dart';
 import 'package:moonshine_fe/widgets/cocktail_detail_image_widget.dart';
 
 class CocktailDetailScreen extends StatefulWidget {
+  final int id;
   final String name;
+  final String imgUrl;
   final Geolocation geolocation;
+  final bool isFavorite;
 
   const CocktailDetailScreen({
     super.key,
+    required this.id,
     required this.name,
+    required this.imgUrl,
     required this.geolocation,
+    required this.isFavorite,
   });
 
   @override
@@ -22,12 +29,14 @@ class CocktailDetailScreen extends StatefulWidget {
 
 class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
   late Future<Map<String, dynamic>> detail;
+  bool currentFavorite = false;
 
   @override
   void initState() {
     super.initState();
-    detail = CocktailProject.getDetail(widget.name);
-
+    // detail = CocktailProject.getDetail(widget.name);
+    detail = CocktailApi.getDetail(widget.id);
+    currentFavorite = widget.isFavorite;
     setState(() {});
   }
 
@@ -45,8 +54,15 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
               forceElevated: innerBoxIsScrolled,
               actions: [
                 IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.bookmark_border_outlined),
+                  onPressed: () async {
+                    var result =
+                        await FavoriteApi.toggleCocktailFavorite(widget.id);
+                    currentFavorite = result;
+                    setState(() {});
+                  },
+                  icon: Icon(currentFavorite
+                      ? Icons.bookmark
+                      : Icons.bookmark_border_outlined),
                 ),
               ],
             ),
@@ -63,7 +79,8 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                   children: [
                     // Image
                     CocktailDetailImage(
-                      imgList: snapshot.data!['imgList'],
+                      // imgList: snapshot.data!['imgList'],
+                      imgList: ['assets/image/${widget.imgUrl}'],
                     ),
                     // Name
                     Row(
@@ -87,7 +104,7 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                           ),
                         ),
                         Text(
-                          '40%',
+                          '${snapshot.data!["tastes"]["alcohol"]}%',
                           style: TextStyle(
                             fontFamily: Theme.of(context)
                                 .textTheme
@@ -99,7 +116,18 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                       ],
                     ),
                     // Chart
-                    CocktailDetailChart(name: widget.name),
+                    CocktailDetailChart(
+                      cocktail_name: widget.name,
+                      cocktail_gentle:
+                          snapshot.data!['tastes']['gentle'].toDouble(),
+                      cocktail_boozy:
+                          snapshot.data!['tastes']['boozy'].toDouble(),
+                      cocktail_sweet:
+                          snapshot.data!['tastes']['sweet'].toDouble(),
+                      cocktail_dry: snapshot.data!['tastes']['dry'].toDouble(),
+                      cocktail_alcohol:
+                          snapshot.data!['tastes']['alcohol'].toDouble() / 10.0,
+                    ),
                     // Ingredients, Recipe Title
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
@@ -153,37 +181,21 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                                 horizontal: 10,
                               ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Ingredient1',
-                                    style: TextStyle(
-                                      fontFamily: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall!
-                                          .fontFamily,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Ingredient2',
-                                    style: TextStyle(
-                                      fontFamily: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall!
-                                          .fontFamily,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Ingredient3',
-                                    style: TextStyle(
-                                      fontFamily: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall!
-                                          .fontFamily,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    for (var item
+                                        in snapshot.data!['ingredients'])
+                                      Text(
+                                        '${item["name"].trim()} - ${item["quantity"].trim()}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontFamily: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .fontFamily,
+                                        ),
+                                      ),
+                                  ]),
                             ),
                           ),
                           const VerticalDivider(
@@ -201,26 +213,9 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '1. Recipe1Recipe1Recipe1Recipe1Recipe1Recipe1',
+                                    snapshot.data!['recipe'],
                                     style: TextStyle(
-                                      fontFamily: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall!
-                                          .fontFamily,
-                                    ),
-                                  ),
-                                  Text(
-                                    '2. Recipe2Recipe2Recipe2Recipe2Recipe2Recipe2',
-                                    style: TextStyle(
-                                      fontFamily: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall!
-                                          .fontFamily,
-                                    ),
-                                  ),
-                                  Text(
-                                    '3. Recipe3Recipe3Recipe3Recipe3Recipe3Recipe3',
-                                    style: TextStyle(
+                                      fontSize: 16,
                                       fontFamily: Theme.of(context)
                                           .textTheme
                                           .bodySmall!
@@ -254,9 +249,9 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                       ],
                     ),
                     // Bars List
-                    CocktailDetailBarList(
-                      geolocation: widget.geolocation,
-                    ),
+                    // CocktailDetailBarList(
+                    //   geolocation: widget.geolocation,
+                    // ),
                     // Similar Cocktails Title
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -280,35 +275,35 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                     CocktailDetailCocktailList(
                       geolocation: widget.geolocation,
                     ),
-                    // User Recipes Title
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                          child: Text(
-                            'User Recipes',
-                            style: TextStyle(
-                              fontFamily: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .fontFamily,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    // User Recipes List
-                    Row(
-                      children: const [
-                        Expanded(
-                          child: Center(
-                            child: Text('User Recipes List'),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // // User Recipes Title
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   children: [
+                    //     Padding(
+                    //       padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                    //       child: Text(
+                    //         'User Recipes',
+                    //         style: TextStyle(
+                    //           fontFamily: Theme.of(context)
+                    //               .textTheme
+                    //               .bodyMedium!
+                    //               .fontFamily,
+                    //           fontSize: 20,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    // // User Recipes List
+                    // Row(
+                    //   children: const [
+                    //     Expanded(
+                    //       child: Center(
+                    //         child: Text('User Recipes List'),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     // Blogs Title
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -329,14 +324,18 @@ class _CocktailDetailScreenState extends State<CocktailDetailScreen> {
                       ],
                     ),
                     // Blogs List
-                    Row(
-                      children: const [
-                        Expanded(
-                          child: Center(
-                            child: Text('Blogs List'),
-                          ),
-                        ),
-                      ],
+                    // Row(
+                    //   children: const [
+                    //     Expanded(
+                    //       child: Center(
+                    //         child: Text('Blogs List'),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    CocktailDetailBlogList(
+                      blogList: snapshot.data!['blogs'],
+                      geolocation: widget.geolocation,
                     ),
                     // SizedBox
                     const SizedBox(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moonshine_fe/screens/home_screen.dart';
 
 void main() {
+  // DatabaseHelper().connectDB();
   runApp(const MyApp());
 }
 

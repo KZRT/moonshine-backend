@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:moonshine_fe/apis/cocktail_project.dart';
+import 'package:moonshine_fe/apis/bar_api.dart';
 import 'package:moonshine_fe/apis/geolocation.dart';
+import 'package:moonshine_fe/screens/bar_detail_screen.dart';
 import 'package:moonshine_fe/screens/map_screen.dart';
 import 'package:moonshine_fe/widgets/bar_tab_item_widget.dart';
 import 'package:searchfield/searchfield.dart';
@@ -17,14 +18,17 @@ class BarTabScreen extends StatefulWidget {
 }
 
 class _BarTabScreenState extends State<BarTabScreen> {
-  final Future<List<Map<String, String>>> barList = DiffordsGuide.getBarList();
+  // final Future<List<Map<String, String>>> barList = DiffordsGuide.getBarList();
+  final Future<List<Map<String, dynamic>>> barList = BarApi.getBarList();
   String? currentAddress;
 
   void getLocation() async {
     await widget.geolocation.getAddressFromLatLng().then((address) {
       currentAddress = address;
     });
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -39,13 +43,13 @@ class _BarTabScreenState extends State<BarTabScreen> {
       future: barList,
       builder: ((context, snapshot) {
         if (snapshot.hasData) {
-          List<String> names = [];
-          for (var item in snapshot.data!) {
-            names.add(item['name']!);
-          }
+          // List<String> names = [];
+          // for (var item in snapshot.data!) {
+          //   names.add(item['name']!);
+          // }
           return ListView.separated(
             scrollDirection: Axis.vertical,
-            itemCount: snapshot.data!.length ~/ 2,
+            itemCount: (snapshot.data!.length + 1) ~/ 2,
             padding: const EdgeInsets.symmetric(
               vertical: 10,
               horizontal: 10,
@@ -63,13 +67,13 @@ class _BarTabScreenState extends State<BarTabScreen> {
                   children: [
                     Row(
                       children: [
-                        const SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Center(
-                            child: Text('추천순'),
-                          ),
-                        ),
+                        // const SizedBox(
+                        //   width: 40,
+                        //   height: 40,
+                        //   child: Center(
+                        //     child: Text('추천순'),
+                        //   ),
+                        // ),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -92,18 +96,36 @@ class _BarTabScreenState extends State<BarTabScreen> {
                                   ),
                                 ),
                               ),
-                              suggestions: names
-                                  .map((name) => SearchFieldListItem(
-                                        name,
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 10,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Text(name),
-                                            ],
+                              suggestions: snapshot.data!
+                                  .map((item) => SearchFieldListItem(
+                                        item['name'],
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    BarDetailScreen(
+                                                  id: item['id'],
+                                                  name: item['name'],
+                                                  geolocation:
+                                                      widget.geolocation,
+                                                  isFavorite:
+                                                      item['is_favorite'],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 20,
+                                              vertical: 10,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Text(item['name']),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ))
@@ -140,6 +162,8 @@ class _BarTabScreenState extends State<BarTabScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => MapScreen(
                                     geolocation: widget.geolocation,
+                                    lat: 0.0,
+                                    lon: 0.0,
                                   ),
                                 ),
                               );
@@ -153,16 +177,28 @@ class _BarTabScreenState extends State<BarTabScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         BarTabItem(
-                          imgUrl: snapshot.data![0]['imgUrl']!,
+                          id: snapshot.data![0]['id']!,
+                          imgUrl: snapshot.data![0]['url']!,
                           name: snapshot.data![0]['name']!,
-                          url: snapshot.data![0]['url']!,
+                          // url: snapshot.data![0]['url']!,
                           geolocation: widget.geolocation,
+                          isFavorite: snapshot.data![0]['is_favorite']!,
                         ),
                         BarTabItem(
-                          imgUrl: snapshot.data![1]['imgUrl']!,
-                          name: snapshot.data![1]['name']!,
-                          url: snapshot.data![1]['url']!,
+                          id: (snapshot.data!.length == 1)
+                              ? -1
+                              : snapshot.data![1]['id']!,
+                          imgUrl: (snapshot.data!.length == 1)
+                              ? ''
+                              : snapshot.data![1]['url']!,
+                          name: (snapshot.data!.length == 1)
+                              ? ''
+                              : snapshot.data![1]['name']!,
+                          // url: snapshot.data![1]['url']!,
                           geolocation: widget.geolocation,
+                          isFavorite: (snapshot.data!.length == 1)
+                              ? false
+                              : snapshot.data![1]['is_favorite']!,
                         ),
                       ],
                     ),
@@ -173,16 +209,28 @@ class _BarTabScreenState extends State<BarTabScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   BarTabItem(
-                    imgUrl: snapshot.data![index * 2]['imgUrl']!,
+                    id: snapshot.data![index * 2]['id']!,
+                    imgUrl: snapshot.data![index * 2]['url']!,
                     name: snapshot.data![index * 2]['name']!,
-                    url: snapshot.data![index * 2]['url']!,
+                    // url: snapshot.data![index * 2]['url']!,
                     geolocation: widget.geolocation,
+                    isFavorite: snapshot.data![index * 2]['is_favorite']!,
                   ),
                   BarTabItem(
-                    imgUrl: snapshot.data![index * 2 + 1]['imgUrl']!,
-                    name: snapshot.data![index * 2 + 1]['name']!,
-                    url: snapshot.data![index * 2 + 1]['url']!,
+                    id: (index * 2 + 1 == snapshot.data!.length)
+                        ? -1
+                        : snapshot.data![index * 2 + 1]['id']!,
+                    imgUrl: (index * 2 + 1 == snapshot.data!.length)
+                        ? ''
+                        : snapshot.data![index * 2 + 1]['url']!,
+                    name: (index * 2 + 1 == snapshot.data!.length)
+                        ? ''
+                        : snapshot.data![index * 2 + 1]['name']!,
+                    // url: snapshot.data![index * 2 + 1]['url']!,
                     geolocation: widget.geolocation,
+                    isFavorite: (index * 2 + 1 == snapshot.data!.length)
+                        ? ''
+                        : snapshot.data![index * 2 + 1]['is_favorite']!,
                   ),
                 ],
               );

@@ -23,7 +23,6 @@ class DatabaseHelper{
           username: 'whbaek', password: 'moonshine');
       await dbConnection.open();
 
-    debugPrint("Database Connected");
     return dbConnection;
   }
 

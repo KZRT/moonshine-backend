@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:moonshine_fe/apis/geolocation.dart';
+import 'package:moonshine_fe/screens/account_setting_screen.dart';
 
 import 'package:moonshine_fe/screens/bar_tab_screen.dart';
 import 'package:moonshine_fe/screens/blog_tab_screen.dart';
 import 'package:moonshine_fe/screens/cocktail_tab_screen.dart';
+import 'package:moonshine_fe/config.dart' as globals;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -90,59 +92,58 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             CocktailTabScreen(
               geolocation: geolocation,
             ),
-            const BlogTabScreen(),
+            BlogTabScreen(
+              geolocation: geolocation,
+            ),
           ],
         ),
       ),
       endDrawer: Drawer(
         child: Column(
-          children: const [
+          children: [
             UserAccountsDrawerHeader(
-              accountName: Text('AccountName'),
-              accountEmail: Text('AccountEmail'),
-              currentAccountPicture: CircleAvatar(),
+              accountName: Text(globals.userName),
+              accountEmail: const Text(''),
+              // currentAccountPicture: const CircleAvatar(),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 20,
+            GestureDetector(
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AccountSettingScreen(),
+                  ),
+                );
+                setState(() {});
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 20,
+                ),
+                child: Text('Account Settings'),
               ),
-              child: Text('Account Settings'),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 20,
                 horizontal: 20,
               ),
               child: Text('Favorites'),
             ),
-            Padding(
+            // const Padding(
+            //   padding: EdgeInsets.symmetric(
+            //     vertical: 20,
+            //     horizontal: 20,
+            //   ),
+            //   child: Text('Favorite Cocktails'),
+            // ),
+            const Padding(
               padding: EdgeInsets.symmetric(
                 vertical: 20,
                 horizontal: 20,
               ),
-              child: Text('My Bar Blog'),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 20,
-              ),
-              child: Text('My Cocktail Blog'),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 20,
-              ),
-              child: Text('My Recipe Blog'),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 20,
-              ),
-              child: Text('My Free Blog'),
+              child: Text('My Blogs'),
             ),
           ],
         ),
